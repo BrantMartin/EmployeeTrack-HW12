@@ -1,7 +1,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
-const { allowedNodeEnvironmentFlags } = require("process");
-const { inherits } = require("util");
+require("console.table")
+
 
 const db = mysql.createConnection({
   host: "localhost",
@@ -12,14 +12,14 @@ const db = mysql.createConnection({
 
 db.connect(function () {
   console.log(`Connected to the employee_db database.`);
-  startmenu();
+  startMenu();
 });
 
-function startmenu() {
+function startMenu() {
   inquirer.prompt([
     {
       type: 'list',
-      name:"options"
+      name:"options",
       message: 'What would you like to do?',
       choices: ["Add Department","Add Employee","Add Role",
       "View Departments", "View Role","View Employees","Exit App"]
@@ -48,5 +48,27 @@ function startmenu() {
         db.end();
         process.exit(0);
     }
+  })
+}
+
+function addDepartment() {
+  inquirer.prompt([{
+    type: 'input',
+    name: 'departmentName',
+    message: 'Enter department name.',
+  }]).then(({departmentName}) =>{
+    db.query('INSERT INTO department (department_name) VALUES(?);', departmentName,function(err,response){
+      if(err) throw err;
+      console.table(response)
+      startMenu()
+    })
+  })
+}
+
+function viewDepartment() {
+  db.query('SELECT * FROM department;',function(err,response){
+    if(err) throw err;
+    console.table(response)
+    startMenu()
   })
 }
